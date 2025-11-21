@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&family=Josefin+Slab:wght@600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0f0f13;
+  color: #ffffff;
+  font-family: 'Josefin Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Ocultar scrollbar pero permitir scroll (Estética limpia) */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f0f13;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF9B85;
+}
+
+/* Clases de utilidad para imágenes */
+.image-hover-zoom {
+  @apply transition-transform duration-700 ease-in-out;
+}
+
+.group:hover .image-hover-zoom {
+  @apply scale-110;
+}

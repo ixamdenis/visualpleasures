@@ -1,0 +1,104 @@
+// Conexión a la base de datos
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- DEFINICIÓN DE ROLES Y USUARIOS ---
+
+// Enumera los roles posibles para evitar errores de escritura
+enum Role {
+  MEMBER      // Usuario registrado básico (Silver)
+  VIP         // Usuario que ya compró
+  MODEL       // Creadora de contenido
+  ADMIN       // Soporte / Admin intermedio
+  SUPERADMIN  // Dueño total
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String   // Aquí guardaremos la contraseña encriptada
+  name      String?
+  role      Role     @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  modelProfile ModelProfile? // Solo si es modelo tendrá esto
+  purchases    Purchase[]    // Compras realizadas por el usuario
+  messages     Message[]     // Mensajes enviados (si es VIP)
+}
+
+// --- PERFIL ESPECÍFICO PARA MODELOS ---
+
+model ModelProfile {
+  id          Int     @id @default(autoincrement())
+  bio         String? @db.Text // Texto largo
+  location    String?
+  specialties String? // Ej: "B&W, Artistic Nude"
+  socialLinks Json?   // Para guardar varias redes sociales
+  
+  userId      Int     @unique
+  user        User    @relation(fields: [userId], references: [id])
+
+  galleries   Gallery[]
+}
+
+// --- GALERÍAS Y CONTENIDO ---
+
+model Gallery {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @db.Text
+  price       Decimal  @db.Decimal(10, 2) // Ej: 1500.00
+  coverImage  String   // URL de la imagen principal
+  rating      Int      @default(5) // 1 a 5 estrellas
+  isPublished Boolean  @default(false) // Requiere aprobación de admin
+  
+  modelId     Int
+  model       ModelProfile @relation(fields: [modelId], references: [id])
+  
+  assets      Asset[]    // Fotos y videos dentro de la galería
+  purchases   Purchase[] // Quién compró esta galería
+  
+  createdAt   DateTime @default(now())
+}
+
+model Asset {
+  id        Int      @id @default(autoincrement())
+  url       String   // Link al archivo
+  type      String   // "IMAGE" o "VIDEO"
+  isPreview Boolean  @default(false) // Si es true, es parte de las 4 gratis
+  
+  galleryId Int
+  gallery   Gallery  @relation(fields: [galleryId], references: [id])
+}
+
+// --- COMPRAS Y MENSAJES ---
+
+model Purchase {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  galleryId Int
+  gallery   Gallery  @relation(fields: [galleryId], references: [id])
+  amount    Decimal  @db.Decimal(10, 2)
+  date      DateTime @default(now())
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  
+  fromUserId Int
+  fromUser   User @relation(fields: [fromUserId], references: [id])
+  
+  // Simplificación: por ahora los mensajes van al sistema, luego refinaremos
+  // la lógica de chat directo Modelo-VIP
+  createdAt DateTime @default(now())
+}
