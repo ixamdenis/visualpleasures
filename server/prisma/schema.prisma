@@ -51,6 +51,12 @@ model ModelProfile {
 
 // --- GALERÍAS Y CONTENIDO ---
 
+enum GalleryStatus {
+  PENDING   // Esperando revisión
+  PUBLISHED // Visible para todos
+  REJECTED  // Rechazada (requiere corrección)
+}
+
 model Gallery {
   id          Int      @id @default(autoincrement())
   title       String
@@ -58,7 +64,8 @@ model Gallery {
   price       Decimal  @db.Decimal(10, 2) // Ej: 1500.00
   coverImage  String   // URL de la imagen principal
   rating      Int      @default(5) // 1 a 5 estrellas
-  isPublished Boolean  @default(false) // Requiere aprobación de admin
+  status      GalleryStatus @default(PENDING)
+  adminFeedback String?   @db.Text
   
   modelId     Int
   model       ModelProfile @relation(fields: [modelId], references: [id])

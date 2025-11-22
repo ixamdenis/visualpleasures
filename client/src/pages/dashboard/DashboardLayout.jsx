@@ -33,7 +33,8 @@ export default function DashboardLayout() {
     // 3. Si es ADMIN: Agregamos herramientas de moderación
     if (user?.role === 'ADMIN' || user?.role === 'SUPERADMIN') {
         menuItems.push(
-            { icon: ShieldCheck, label: 'Moderación', path: '/dashboard/admin' }
+            { icon: ShieldCheck, label: 'Moderación', path: '/dashboard/admin' },
+            { icon: LayoutDashboard, label: 'Gestión Global', path: '/dashboard/admin/all' } // <--- NUEVO
         );
     }
 
